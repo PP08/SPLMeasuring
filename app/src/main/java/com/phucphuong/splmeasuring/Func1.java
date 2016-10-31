@@ -26,8 +26,10 @@ public class Func1 extends AppCompatActivity {
 
     ProgressBar pbCounter;
     TextView tv_message, tv_pressure;
-    public SoundMeter test;
 
+    protected Button btn_calUp, btn_calDown;
+
+    public SoundMeter test;
     protected double val = 0;
 
     @Override
@@ -39,8 +41,11 @@ public class Func1 extends AppCompatActivity {
         tv_message = (TextView) findViewById(R.id.tv_message);
         tv_pressure = (TextView) findViewById(R.id.tv_pressure);
         pbCounter = (ProgressBar) findViewById(R.id.pb_counter);
-        pbCounter.setMax(140);
 
+        btn_calUp = (Button) findViewById(R.id.btn_calUp);
+        btn_calDown = (Button) findViewById(R.id.btn_calDown);
+
+        pbCounter.setMax(140);
 
         final ToggleButton toggle = (ToggleButton) findViewById(R.id.btn_measure1);
         toggle.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -53,15 +58,34 @@ public class Func1 extends AppCompatActivity {
 //                    test.t2.start();
                     test.t1.start();
 
+                    btn_calUp.setVisibility(View.VISIBLE);
+                    btn_calDown.setVisibility(View.VISIBLE);
+
                 } else {
                     // The toggle is disabled
                     toggle.setText("Start");
-
                     test.terminate();
                     test.t1.interrupt();
+                    btn_calUp.setVisibility(View.INVISIBLE);
+                    btn_calDown.setVisibility(View.INVISIBLE);
                 }
             }
         });
+
+
+        btn_calUp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                test.calUp();
+            }
+        });
+        btn_calDown.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                test.calDown();
+            }
+        });
+
     }
 
     protected Handler handler = new Handler(){
@@ -69,10 +93,6 @@ public class Func1 extends AppCompatActivity {
         public void handleMessage(Message msg){
             super.handleMessage(msg);
             handler.obtainMessage();
-//            pbCounter.setProgress(msg.getData().getInt("x"));
-
-//            val = Double.parseDouble(msg.obj.toString());
-
             val = msg.getData().getDouble("x");
             String[] arr=String.valueOf(val).split("\\.");
             int[] intArr=new int[2];

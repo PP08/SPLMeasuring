@@ -53,6 +53,7 @@ public class SoundMeter {
     private static final double P0 = 0.000002;
 
     private static final int CALIB_DEFAULT = -80;
+    private static final int CALIB_INCREMENT = 3;
     private int caliberationValue = CALIB_DEFAULT;
     AudioRecord recordInstance = null;
 
@@ -64,6 +65,22 @@ public class SoundMeter {
 
     public void terminate() {
         running = false;
+    }
+
+    public void calUp(){
+        caliberationValue = caliberationValue + CALIB_INCREMENT;
+        if (caliberationValue == 0)
+        {
+            caliberationValue = caliberationValue + 1;
+        }
+    }
+
+    public void calDown(){
+        caliberationValue = caliberationValue - CALIB_INCREMENT;
+        if (caliberationValue == 0)
+        {
+            caliberationValue = caliberationValue - 1;
+        }
     }
 
     public class myRunnable implements Runnable {
@@ -120,7 +137,7 @@ public class SoundMeter {
                     Message data = Message.obtain();
                     Bundle b = new Bundle();
                     b.putDouble("x", splValue);
-                    b.putString("state", "run");
+                    b.putString("state", "Running");
                     b.putBoolean("kill", running);
                     data.setData(b);
                     handler.sendMessage(data);
@@ -131,7 +148,7 @@ public class SoundMeter {
                 kill = true;
                 Message data = Message.obtain();
                 Bundle b = new Bundle();
-                b.putString("state", "stop");
+                b.putString("state", "Stopped");
                 b.putBoolean("kill", running);
                 data.setData(b);
                 handler.sendMessage(data);
