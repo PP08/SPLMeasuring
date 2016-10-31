@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/content_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.phucphuong.splmeasuring.MainActivity"
+    tools:showIn="@layout/activity_main">
+
+    <Button
+        android:text="Type 1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_func1"
+        android:textAllCaps="false"
+        android:fontFamily="sans-serif-medium"
+        android:elevation="0dp"
+        android:width="200dp"
+        android:layout_above="@+id/btn_func2"
+        android:layout_alignLeft="@+id/btn_func2"
+        android:layout_alignStart="@+id/btn_func2"
+        android:layout_marginBottom="67dp" />
+
+    <Button
+        android:text="Type 2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_func2"
+        android:textAllCaps="false"
+        android:width="200dp"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true" />
+</RelativeLayout>
