@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.CompoundButton;
 
@@ -31,6 +32,8 @@ public class Func1 extends AppCompatActivity {
 
     public SoundMeter test;
     protected double val = 0;
+
+    private boolean btn1_clicked = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,11 +55,11 @@ public class Func1 extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     // The toggle is enabled
+                    btn1_clicked = true;
                     toggle.setText("Stop");
-                    test = new SoundMeter(handler);
-//                    test.t3.start();
-//                    test.t2.start();
+                    test = new SoundMeter(handler, Func1.this);
                     test.t1.start();
+//                    test.t2.start();
 
                     btn_calUp.setVisibility(View.VISIBLE);
                     btn_calDown.setVisibility(View.VISIBLE);
@@ -66,6 +69,7 @@ public class Func1 extends AppCompatActivity {
                     toggle.setText("Start");
                     test.terminate();
                     test.t1.interrupt();
+//                    test.t2.interrupt();
                     btn_calUp.setVisibility(View.INVISIBLE);
                     btn_calDown.setVisibility(View.INVISIBLE);
                 }
@@ -111,5 +115,19 @@ public class Func1 extends AppCompatActivity {
             }
         }
     };
+
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(btn1_clicked && test.t1.isAlive()){
+            test.terminate();
+            test.t1.interrupt();
+//            test.t2.interrupt();
+            Toast toast = Toast.makeText(this, "The measuring has stopped..", Toast.LENGTH_SHORT);
+            toast.show();
+        }
+
+    }
 
 }

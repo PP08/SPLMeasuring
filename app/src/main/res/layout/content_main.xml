@@ -14,6 +14,17 @@
     tools:showIn="@layout/activity_main">
 
     <Button
+        android:text="Type 2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_func2"
+        android:textAllCaps="false"
+        android:width="200dp"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:enabled="false" />
+
+    <Button
         android:text="Type 1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -22,18 +33,9 @@
         android:fontFamily="sans-serif-medium"
         android:elevation="0dp"
         android:width="200dp"
+        android:layout_marginBottom="67dp"
         android:layout_above="@+id/btn_func2"
         android:layout_alignLeft="@+id/btn_func2"
         android:layout_alignStart="@+id/btn_func2"
-        android:layout_marginBottom="67dp" />
-
-    <Button
-        android:text="Type 2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/btn_func2"
-        android:textAllCaps="false"
-        android:width="200dp"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:enabled="false" />
 </RelativeLayout>
