@@ -18,8 +18,8 @@ public class GPSTool {
     private boolean isRunning = true;
     public Handler handler;
 
-    String locationProvider = LocationManager.NETWORK_PROVIDER;
-//    String locationProvider = LocationManager.GPS_PROVIDER;
+//    String locationProvider = LocationManager.NETWORK_PROVIDER;
+    String locationProvider = LocationManager.GPS_PROVIDER;
     private LocationManager locationManager;
     private LocationListener locationListener;
 

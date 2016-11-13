@@ -1,13 +1,10 @@
 package com.phucphuong.splmeasuring;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
+
+import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.ActivityCompat;
+import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,11 +16,13 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.CompoundButton;
 
-public class Func1 extends AppCompatActivity {
+import java.io.FileOutputStream;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
-    //GPS
-    LocationManager locationManager;
-    LocationListener locationListener;
+public class Func1 extends AppCompatActivity {
 
     ProgressBar pbCounter;
     TextView tv_message, tv_pressure;
@@ -110,8 +109,8 @@ public class Func1 extends AppCompatActivity {
                 test.t1.interrupt();
 //                test.t2.interrupt();
 
-                Log.e("thread1", Boolean.toString(test.t1.isAlive()));
-                Log.e("thread2", Boolean.toString(test.t2.isAlive()));
+//                Log.e("thread1", Boolean.toString(test.t1.isAlive()));
+//                Log.e("thread2", Boolean.toString(test.t2.isAlive()));
             }
         }
     };

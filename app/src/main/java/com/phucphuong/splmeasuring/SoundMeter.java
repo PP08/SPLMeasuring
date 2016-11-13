@@ -11,21 +11,23 @@ import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
-import java.io.IOException;
 
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Process;
-import android.os.SystemClock;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Random;
 
-import android.support.v4.app.ActivityCompat;
 import android.util.Log;
+
 
 /**
  * Created by PhucPhuong on 22/10/2016.
@@ -54,6 +56,7 @@ public class SoundMeter {
 
     //test
     Random rd = new Random();
+    private String resultFileName;
 
 
     //params for audio
@@ -69,12 +72,12 @@ public class SoundMeter {
 
 
     //log
-    private FileWriter splLog = null;
-    private static String LOGPATH = "/sdcard/splmeter_";
+    private String FILENAME = "";
 
     public SoundMeter(Handler h, Context context) {
         this.handler = h;
         gpsTool = new GPSTool(context);
+        this.context = context;
     }
 
 
@@ -106,13 +109,14 @@ public class SoundMeter {
             try {
                 android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
                 recordInstance = new AudioRecord(MediaRecorder.AudioSource.MIC, FREQUENCY, CHANNEL, ENCODING, 8000);
+
                 recordInstance.startRecording();
 
                 short[] temBuffer = new short[BUFFSIZE];
 
+                setFileName(); // log's name
                 while (isRunning) {
 
-//                    splValue = 0.0;
                     double rsmValue = 0.0;
 
                     for (int i = 0; i < BUFFSIZE - 1; i++) {
@@ -131,16 +135,13 @@ public class SoundMeter {
 
                     //get the location
                     location = gpsTool.getLocation();
-                    Log.e("location: ", "latitude - " + location.getLatitude() + "longitude - " + location.getLongitude());
+
 
                     //start logging
-                    Calendar cal = Calendar.getInstance();
+                    writeLog();
 
-
-                    Log.e("Date: ", cal.getTime().toString());
 
                     sendMessage(isRunning);
-
                 }
 
                 recordInstance.stop();
@@ -151,6 +152,7 @@ public class SoundMeter {
 
             } catch (Exception e) {
                 Log.e("MY TAG: ", "FAILUREEEEEEEEEEEE");
+                e.printStackTrace();
             }
         }
     }
@@ -185,6 +187,25 @@ public class SoundMeter {
         b.putBoolean("kill", isRunning);
         data.setData(b);
         handler.sendMessage(data);
+    }
+
+    public void setFileName(){
+
+        DateFormat df = new SimpleDateFormat("ddMMyyyy-HHmmss");
+        String date = df.format(Calendar.getInstance().getTime());
+        FILENAME = date + ".csv";
+    }
+
+    public void writeLog(){
+        String data = "test" + "\n";
+        try{
+            FileOutputStream out = context.openFileOutput(FILENAME, Context.MODE_APPEND);
+            out.write(data.getBytes());
+            out.close();
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 }
