@@ -1,5 +1,5 @@
 <resources>
     <string name="app_name">SPL Measuring</string>
     <string name="action_settings">Settings</string>
-    <string name="calibrate_value">80</string>
+    <string name="calibrate_value">calibrateValue</string>
 </resources>

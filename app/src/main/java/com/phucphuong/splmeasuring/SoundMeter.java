@@ -27,6 +27,7 @@ import java.util.Calendar;
 import java.util.Random;
 
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.util.Log;
 import android.provider.Settings.Secure;
 
@@ -58,19 +59,20 @@ public class SoundMeter {
     //test
     Random rd = new Random();
     private String resultFileName;
-    protected DateFormat timeStampFormat = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss.SSS");
+
 
 
     //log
     private String device_id;
     private String timeStamp;
-
+//    private String averageTime;
+    protected DateFormat timeStampFormat = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss.SSS");
 
     //params for audio
-    private static final int FREQUENCY = 8000;
+    private static final int FREQUENCY = 8000; // default 8000
     private static final int CHANNEL = AudioFormat.CHANNEL_IN_MONO;
     private static final int ENCODING = AudioFormat.ENCODING_PCM_16BIT;
-    private int BUFFSIZE = 5000; //320 - default
+    private int BUFFSIZE = 8000; //320 - default
     private static final double P0 = 0.000002;
 //    private static final int CALIB_DEFAULT = -80;
     private static final int CALIB_INCREMENT = 3;
@@ -97,15 +99,20 @@ public class SoundMeter {
         public void run() {
             try {
                 android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
-                recordInstance = new AudioRecord(MediaRecorder.AudioSource.MIC, FREQUENCY, CHANNEL, ENCODING, 8000);
+                recordInstance = new AudioRecord(MediaRecorder.AudioSource.MIC, FREQUENCY, CHANNEL, ENCODING, BUFFSIZE);
 
                 recordInstance.startRecording();
 
                 short[] temBuffer = new short[BUFFSIZE];
 
                 setFileName(); // log's name
-                while (isRunning) {
+                String header = "Device ID" + "," + "Timestamp" + "," + "Pressure" + "," + "Latitude" + "," + "Longitude" + "\n"; //set header for columns
+                FileOutputStream out = context.openFileOutput(FILENAME, Context.MODE_APPEND);
+                out.write(header.getBytes());
+                out.close();
 
+                while (isRunning) {
+                    long startTime = System.currentTimeMillis();
                     double rsmValue = 0.0;
 
                     for (int i = 0; i < BUFFSIZE - 1; i++) {
@@ -126,14 +133,19 @@ public class SoundMeter {
                     location = gpsTool.getLocation();
 
 
-                    //start logging
+                    //get timestamp
                     timeStamp = "";
-                    timeStamp = timeStampFormat.format(Calendar.getInstance().getTime());
-//                    SystemClock.sleep(5000);
-                    writeLog();
+                    long endTime = System.currentTimeMillis();
+                    long averageTime = (startTime + endTime) / 2;
 
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.setTimeInMillis(averageTime);
+                    timeStamp = timeStampFormat.format(calendar.getTime());
 
                     sendMessage(isRunning);
+
+                    //start logging
+                    writeLog();
                 }
 
                 recordInstance.stop();
@@ -205,7 +217,7 @@ public class SoundMeter {
 
     public void setFileName(){
 
-        DateFormat df = new SimpleDateFormat("ddMMyyyy-HHmmss");
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
         String date = df.format(Calendar.getInstance().getTime());
         FILENAME = date + ".csv";
     }
