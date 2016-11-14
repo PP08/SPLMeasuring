@@ -26,8 +26,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Random;
 
+import android.os.SystemClock;
 import android.util.Log;
-
+import android.provider.Settings.Secure;
 
 /**
  * Created by PhucPhuong on 22/10/2016.
@@ -57,50 +58,38 @@ public class SoundMeter {
     //test
     Random rd = new Random();
     private String resultFileName;
+    protected DateFormat timeStampFormat = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss.SSS");
+
+
+    //log
+    private String device_id;
+    private String timeStamp;
 
 
     //params for audio
     private static final int FREQUENCY = 8000;
     private static final int CHANNEL = AudioFormat.CHANNEL_IN_MONO;
     private static final int ENCODING = AudioFormat.ENCODING_PCM_16BIT;
-    private int BUFFSIZE = 320;
+    private int BUFFSIZE = 5000; //320 - default
     private static final double P0 = 0.000002;
-    private static final int CALIB_DEFAULT = -80;
+//    private static final int CALIB_DEFAULT = -80;
     private static final int CALIB_INCREMENT = 3;
-    private int caliberationValue = CALIB_DEFAULT;
+    public int caliberationValue = 0;
     AudioRecord recordInstance = null;
 
 
     //log
     private String FILENAME = "";
 
-    public SoundMeter(Handler h, Context context) {
+    public SoundMeter(Handler h, Context context, int calValue) {
         this.handler = h;
         gpsTool = new GPSTool(context);
         this.context = context;
+        this.caliberationValue = calValue;
+
+        this.device_id = Secure.getString(context.getContentResolver(),Secure.ANDROID_ID);
     }
 
-
-
-    public void terminate() {
-        isRunning = false;
-    }
-
-    public void calUp(){
-        caliberationValue = caliberationValue + CALIB_INCREMENT;
-        if (caliberationValue == 0)
-        {
-            caliberationValue = caliberationValue + 1;
-        }
-    }
-
-    public void calDown(){
-        caliberationValue = caliberationValue - CALIB_INCREMENT;
-        if (caliberationValue == 0)
-        {
-            caliberationValue = caliberationValue - 1;
-        }
-    }
 
     public class myRunnable implements Runnable {
 
@@ -130,7 +119,7 @@ public class SoundMeter {
                     rsmValue = rsmValue / BUFFSIZE;
                     rsmValue = Math.sqrt(rsmValue);
                     splValue = 20 * Math.log10(rsmValue / P0);
-                    splValue += caliberationValue;
+                    splValue -= caliberationValue;
                     splValue = Math.round(splValue);
 
                     //get the location
@@ -138,6 +127,9 @@ public class SoundMeter {
 
 
                     //start logging
+                    timeStamp = "";
+                    timeStamp = timeStampFormat.format(Calendar.getInstance().getTime());
+//                    SystemClock.sleep(5000);
                     writeLog();
 
 
@@ -189,6 +181,28 @@ public class SoundMeter {
         handler.sendMessage(data);
     }
 
+
+    public void terminate() {
+        isRunning = false;
+    }
+
+    public void calUp(){
+        caliberationValue = caliberationValue - CALIB_INCREMENT;
+        if (caliberationValue == 0)
+        {
+            caliberationValue = caliberationValue + 1;
+        }
+    }
+
+    public void calDown(){
+        caliberationValue = caliberationValue + CALIB_INCREMENT;
+        if (caliberationValue == 0)
+        {
+            caliberationValue = caliberationValue - 1;
+        }
+    }
+
+
     public void setFileName(){
 
         DateFormat df = new SimpleDateFormat("ddMMyyyy-HHmmss");
@@ -197,7 +211,8 @@ public class SoundMeter {
     }
 
     public void writeLog(){
-        String data = "test" + "\n";
+        String data;
+        data = device_id + "," + timeStamp + "," + Double.toString(splValue) + "," + location.getLatitude() + "," + location.getLongitude() +"\n";
         try{
             FileOutputStream out = context.openFileOutput(FILENAME, Context.MODE_APPEND);
             out.write(data.getBytes());

@@ -1,10 +1,14 @@
 package com.phucphuong.splmeasuring;
 
 
+import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,6 +28,11 @@ import java.util.Date;
 
 public class Func1 extends AppCompatActivity {
 
+    //for preferences
+    private SharedPreferences sharedPref;
+    private SharedPreferences.Editor editor;
+    private int calibrateValue = 0;
+
     ProgressBar pbCounter;
     TextView tv_message, tv_pressure;
 
@@ -39,7 +48,6 @@ public class Func1 extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_func1);
 
-
         tv_message = (TextView) findViewById(R.id.tv_message);
         tv_pressure = (TextView) findViewById(R.id.tv_pressure);
         pbCounter = (ProgressBar) findViewById(R.id.pb_counter);
@@ -54,9 +62,11 @@ public class Func1 extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     // The toggle is enabled
+                    readPref();
+                    Log.e("calvalue: ", Integer.toString(calibrateValue));
                     btn1_clicked = true;
                     toggle.setText("Stop");
-                    test = new SoundMeter(handler, Func1.this);
+                    test = new SoundMeter(handler, Func1.this, calibrateValue);
                     test.t1.start();
 //                    test.t2.start();
 
@@ -65,12 +75,16 @@ public class Func1 extends AppCompatActivity {
 
                 } else {
                     // The toggle is disabled
+                    writePref();
+                    Log.e("calvalue: ", Integer.toString(calibrateValue));
+
                     toggle.setText("Start");
                     test.terminate();
                     test.t1.interrupt();
 //                    test.t2.interrupt();
                     btn_calUp.setVisibility(View.INVISIBLE);
                     btn_calDown.setVisibility(View.INVISIBLE);
+
                 }
             }
         });
@@ -88,7 +102,6 @@ public class Func1 extends AppCompatActivity {
                 test.calDown();
             }
         });
-
     }
 
     protected Handler handler = new Handler(){
@@ -126,7 +139,18 @@ public class Func1 extends AppCompatActivity {
             Toast toast = Toast.makeText(this, "The measuring has stopped..", Toast.LENGTH_SHORT);
             toast.show();
         }
-
+        writePref();
     }
 
+    private void writePref(){
+        sharedPref = Func1.this.getPreferences(Context.MODE_PRIVATE);
+        editor = sharedPref.edit();
+        editor.putInt(getString(R.string.calibrate_value), test.caliberationValue);
+        editor.commit();
+    }
+
+    private void readPref(){
+        sharedPref = Func1.this.getPreferences(Context.MODE_PRIVATE);
+        calibrateValue = sharedPref.getInt(getString(R.string.calibrate_value), 80);
+    }
 }
