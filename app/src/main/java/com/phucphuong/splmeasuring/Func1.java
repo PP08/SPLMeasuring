@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -20,6 +22,16 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 import android.widget.CompoundButton;
 
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.interfaces.datasets.ILineDataSet;
+import com.github.mikephil.charting.utils.ColorTemplate;
+
 import java.io.FileOutputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -28,7 +40,12 @@ import java.util.Date;
 
 public class Func1 extends AppCompatActivity {
 
-    //for preferences
+    //for the graph
+
+    LineChart lineChart;
+    Typeface mTfLight = Typeface.DEFAULT;
+
+    //for the preferences
     private SharedPreferences sharedPref;
     private SharedPreferences.Editor editor;
     private int calibrateValue = 0;
@@ -47,6 +64,60 @@ public class Func1 extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_func1);
+
+        //graph
+        lineChart = (LineChart) findViewById(R.id.chart);
+
+        //enable description text
+        lineChart.getDescription().setEnabled(true);
+
+        //enable touch gesture
+        lineChart.setTouchEnabled(true);
+
+        //enable scaling and dragging
+        lineChart.setDragEnabled(true);
+        lineChart.setScaleEnabled(false);
+        lineChart.setDrawGridBackground(false);
+
+        //if disabled, scaling can be done on x and y axis separately
+        lineChart.setPinchZoom(false);
+
+        //set an alternative background color
+        lineChart.setBackgroundColor(Color.LTGRAY);
+
+        LineData data = new LineData();
+        data.setValueTextColor(Color.WHITE);
+
+        //add empty data
+        lineChart.setData(data);
+
+        //get the legend (only possible after setting data)
+        Legend l = lineChart.getLegend();
+
+        //modify the legend
+        l.setForm(Legend.LegendForm.LINE);
+        l.setTypeface(mTfLight);
+        l.setTextColor(Color.WHITE);
+
+        //axis
+        XAxis xl = lineChart.getXAxis();
+        xl.setTypeface(mTfLight);
+        xl.setTextColor(Color.WHITE);
+        xl.setDrawGridLines(false);
+        xl.setAvoidFirstLastClipping(true);
+        xl.setEnabled(true);
+
+        YAxis leftAxis = lineChart.getAxisLeft();
+        leftAxis.setTypeface(mTfLight);
+        leftAxis.setTextColor(Color.WHITE);
+        leftAxis.setAxisMaximum(130f);
+        leftAxis.setAxisMinimum(0f);
+
+        YAxis rightAxis = lineChart.getAxisRight();
+        rightAxis.setEnabled(false);
+
+        ///////////////
+
 
         tv_message = (TextView) findViewById(R.id.tv_message);
         tv_pressure = (TextView) findViewById(R.id.tv_pressure);
@@ -67,6 +138,7 @@ public class Func1 extends AppCompatActivity {
                     btn1_clicked = true;
                     toggle.setText("Stop");
                     test = new SoundMeter(handler, Func1.this, calibrateValue);
+                    SystemClock.sleep(500);
                     test.t1.start();
 //                    test.t2.start();
 
@@ -118,6 +190,8 @@ public class Func1 extends AppCompatActivity {
             tv_message.setText(msg.getData().getString("state"));
             tv_pressure.setText(Double.toString(msg.getData().getDouble("x")) + " dB");
 
+            addEntry();
+
             if(msg.getData().getBoolean("kill")){
                 test.t1.interrupt();
 //                test.t2.interrupt();
@@ -151,6 +225,57 @@ public class Func1 extends AppCompatActivity {
 
     private void readPref(){
         sharedPref = Func1.this.getPreferences(Context.MODE_PRIVATE);
-        calibrateValue = sharedPref.getInt(getString(R.string.calibrate_value), 80);
+        calibrateValue = sharedPref.getInt(getString(R.string.calibrate_value), 94);
     }
+
+
+
+    // functions for the graph
+
+    private void addEntry(){
+        LineData data = lineChart.getData();
+
+        if (data != null){
+            ILineDataSet set = data.getDataSetByIndex(0);
+            //set.addEntry(...) //can be called as well
+
+            if (set == null){
+                set = createSet();
+                data.addDataSet(set);
+            }
+
+            data.addEntry(new Entry(set.getEntryCount(), (float) val), 0);
+            data.notifyDataChanged();
+
+            //let the chart know it's data has changed
+            lineChart.notifyDataSetChanged();
+
+            //limit the number of visible entries
+            lineChart.setVisibleXRangeMaximum(10);
+
+            //move to the latest entry
+            lineChart.moveViewToX(data.getEntryCount());
+
+        }
+
+    }
+
+    private LineDataSet createSet(){
+
+        LineDataSet set = new LineDataSet(null, "Dynamic Data");
+        set.setAxisDependency(YAxis.AxisDependency.LEFT);
+        set.setColor(ColorTemplate.getHoloBlue());
+        set.setCircleColor(Color.WHITE);
+        set.setLineWidth(2f);
+        set.setCircleRadius(4f);
+        set.setFillAlpha(65);
+        set.setFillColor(ColorTemplate.getHoloBlue());
+        set.setHighLightColor(Color.rgb(244, 117, 117));
+        set.setValueTextColor(Color.WHITE);
+        set.setValueTextSize(9f);
+        set.setDrawValues(false);
+
+        return set;
+    }
+
 }

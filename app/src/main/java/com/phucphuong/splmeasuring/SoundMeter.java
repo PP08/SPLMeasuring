@@ -16,6 +16,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -37,10 +38,8 @@ import android.provider.Settings.Secure;
 
 public class SoundMeter {
 
-    //gps
+
     public Context context;
-    public LocationManager locationManager;
-    public LocationListener locationListener;
     private GPSTool gpsTool;
     private Location location;
 
@@ -72,10 +71,10 @@ public class SoundMeter {
     private static final int FREQUENCY = 8000; // default 8000
     private static final int CHANNEL = AudioFormat.CHANNEL_IN_MONO;
     private static final int ENCODING = AudioFormat.ENCODING_PCM_16BIT;
-    private int BUFFSIZE = 8000; //320 - default
+    private int BUFFSIZE = 16000; //320 - default
     private static final double P0 = 0.000002;
 //    private static final int CALIB_DEFAULT = -80;
-    private static final int CALIB_INCREMENT = 3;
+    private static final int CALIB_INCREMENT = 1;
     public int caliberationValue = 0;
     AudioRecord recordInstance = null;
 
@@ -98,8 +97,10 @@ public class SoundMeter {
         @Override
         public void run() {
             try {
-                android.os.Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
+                Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
                 recordInstance = new AudioRecord(MediaRecorder.AudioSource.MIC, FREQUENCY, CHANNEL, ENCODING, BUFFSIZE);
+
+                Log.e("State", Integer.toString(recordInstance.getState()));
 
                 recordInstance.startRecording();
 
@@ -115,23 +116,39 @@ public class SoundMeter {
                     long startTime = System.currentTimeMillis();
                     double rsmValue = 0.0;
 
-                    for (int i = 0; i < BUFFSIZE - 1; i++) {
+                    for (int i = 0; i < BUFFSIZE; i++) {
                         temBuffer[i] = 0;
                     }
 
                     recordInstance.read(temBuffer, 0, BUFFSIZE);
-                    for (int i = 0; i < BUFFSIZE - 1; i++) {
+
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        Log.e("Buffer", Integer.toString(recordInstance.getBufferSizeInFrames()));
+                        //Log.e("test", Integer.toString(AudioRecord.getMinBufferSize(8000,AudioFormat.CHANNEL_IN_MONO,AudioFormat.ENCODING_PCM_16BIT)));
+
+                    }
+
+
+
+                    for (int i = 0; i < BUFFSIZE; i++) {
                         rsmValue += temBuffer[i] * temBuffer[i];
                     }
-                    rsmValue = rsmValue / BUFFSIZE;
+
                     rsmValue = Math.sqrt(rsmValue);
-                    splValue = 20 * Math.log10(rsmValue / P0);
-                    splValue -= caliberationValue;
+
+                    splValue = 10 * Math.log10(rsmValue/BUFFSIZE);
+
+
+//                    rsmValue = rsmValue / BUFFSIZE;
+//                    rsmValue = Math.sqrt(rsmValue);
+//                    splValue = 20 * Math.log10(rsmValue / P0);
+                    splValue += caliberationValue;
                     splValue = Math.round(splValue);
 
                     //get the location
                     location = gpsTool.getLocation();
 
+                    Log.e("location", Double.toString(location.getLongitude()) + " ; " + Double.toString(location.getLatitude()));
 
                     //get timestamp
                     timeStamp = "";
@@ -199,7 +216,7 @@ public class SoundMeter {
     }
 
     public void calUp(){
-        caliberationValue = caliberationValue - CALIB_INCREMENT;
+        caliberationValue = caliberationValue + CALIB_INCREMENT;
         if (caliberationValue == 0)
         {
             caliberationValue = caliberationValue + 1;
@@ -207,7 +224,7 @@ public class SoundMeter {
     }
 
     public void calDown(){
-        caliberationValue = caliberationValue + CALIB_INCREMENT;
+        caliberationValue = caliberationValue - CALIB_INCREMENT;
         if (caliberationValue == 0)
         {
             caliberationValue = caliberationValue - 1;

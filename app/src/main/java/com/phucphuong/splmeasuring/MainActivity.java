@@ -39,8 +39,8 @@ public class MainActivity extends AppCompatActivity {
         btnf2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-            Toast toast = Toast.makeText(MainActivity.this, "There is nothing here, yet..", Toast.LENGTH_SHORT);
-            toast.show();
+                Intent intent = new Intent(MainActivity.this, Func2.class);
+                startActivity(intent);
             }
         });
 

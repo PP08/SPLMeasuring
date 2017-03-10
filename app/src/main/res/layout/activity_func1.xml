@@ -25,26 +25,45 @@
     <!--</LinearLayout>-->
 
 
-    <ToggleButton
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btn_measure1"
-        android:layout_marginBottom="43dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:textOff="Start"
-        android:textOn="Stop" />
+        android:id="@+id/tv_message"
+        android:layout_alignLeft="@+id/btn_calDown"
+        android:layout_alignStart="@+id/btn_calDown" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_pressure"
+        android:layout_alignRight="@+id/btn_calUp"
+        android:layout_alignEnd="@+id/btn_calUp" />
 
     <TextView
         android:text="Please keep your phone stable to start the measuring!"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/text_notice"
-        android:layout_marginBottom="29dp"
-        android:layout_above="@+id/btn_measure1"
-        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="13dp"
         android:textAlignment="center"
-        android:textSize="13sp" />
+        android:textSize="13sp"
+        android:layout_above="@+id/btn_measure1"
+        android:layout_centerHorizontal="true" />
+
+    <Button
+        android:text="Increase"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/btn_calUp"
+        android:textAllCaps="false"
+        android:cursorVisible="false"
+        android:visibility="invisible"
+        android:layout_alignBaseline="@+id/btn_calDown"
+        android:layout_alignBottom="@+id/btn_calDown"
+        android:layout_alignRight="@+id/text_notice"
+        android:layout_alignEnd="@+id/text_notice"
+        android:layout_marginRight="34dp"
+        android:layout_marginEnd="34dp" />
 
     <ProgressBar
         android:id="@+id/pb_counter"
@@ -52,10 +71,10 @@
         android:layout_height="wrap_content"
         android:indeterminate="false"
         style="?android:attr/progressBarStyleHorizontal"
-        android:layout_marginTop="45dp"
-        android:layout_below="@+id/tv_message"
+        android:layout_above="@+id/btn_calDown"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="24dp" />
 
     <Button
         android:text="Decrease"
@@ -64,38 +83,27 @@
         android:id="@+id/btn_calDown"
         android:textAllCaps="false"
         android:visibility="invisible"
-        android:layout_alignBaseline="@+id/btn_calUp"
-        android:layout_alignBottom="@+id/btn_calUp"
+        android:layout_marginBottom="21dp"
+        android:layout_above="@+id/text_notice"
         android:layout_toLeftOf="@+id/btn_measure1"
         android:layout_toStartOf="@+id/btn_measure1" />
 
-    <Button
-        android:text="Increase"
+    <ToggleButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:id="@+id/btn_calUp"
-        android:textAllCaps="false"
-        android:layout_marginTop="55dp"
-        android:cursorVisible="false"
-        android:visibility="invisible"
-        android:layout_below="@+id/pb_counter"
-        android:layout_toRightOf="@+id/btn_measure1"
-        android:layout_toEndOf="@+id/btn_measure1" />
+        android:id="@+id/btn_measure1"
+        android:textOff="Start"
+        android:textOn="Stop"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/tv_message"
-        android:layout_alignParentTop="true"
-        android:layout_alignLeft="@+id/btn_calDown"
-        android:layout_alignStart="@+id/btn_calDown" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/tv_pressure"
-        android:layout_alignParentTop="true"
-        android:layout_alignRight="@+id/btn_calUp"
-        android:layout_alignEnd="@+id/btn_calUp" />
+    <com.github.mikephil.charting.charts.LineChart
+        android:id="@+id/chart"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_above="@+id/pb_counter"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="28dp" />
 
 </RelativeLayout>
